@@ -146,6 +146,23 @@ body{
      align-self. */
 }
 
+/* A row is as tall as its tallest cell. Two cells sharing a row can each
+   outgrow their square by a different amount — in a narrow 4-column
+   layout ELSEWHERE overran by 3.3px and NOW by less — and the shorter one
+   then leaves a sliver of ink below it, which reads as one rule being
+   thicker than the others. Measured: a 1.64px line where every other was
+   1px.
+
+   Only single-column cells get this. They are the ones that end up
+   shorter than a row set by a neighbour, and their content is short
+   enough that the min-content floor is safe. Applying it to the wide
+   cells makes QUOTES and GUESTBOOK overflow the slab, and applying the
+   floor to them eats their bottom padding — both measured, twice. */
+.cell:not(.cell--w2):not(.cell--w4){
+  align-self:stretch;
+  min-height:min-content;
+}
+
 .cell--w2{grid-column:span 2;aspect-ratio:2/1}
 .cell--w4{grid-column:span 4;aspect-ratio:auto}
 .cell--h2{grid-row:span 2;aspect-ratio:auto}

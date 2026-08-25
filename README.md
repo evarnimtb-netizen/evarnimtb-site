@@ -58,6 +58,13 @@ the dithered shadow doesn't eat into that lower gap.
 - **At 2 columns, 1x1 cells must come out even.** An odd one leaves a
   black hole beside it. Either pair them up or widen one — that's what
   the `.cell--big` rule in the 900px block is doing.
+- **One rule looking thicker than the rest** means a cell is shorter
+  than its row. A row is as tall as its tallest cell, and two cells
+  sharing a row can each outgrow their square by a different amount, so
+  the shorter one leaves a sliver of ink under it. Single-column cells
+  carry `align-self: stretch` + `min-height: min-content` to fill their
+  row. Do **not** extend that to the wide cells: it makes QUOTES and
+  GUESTBOOK overflow the slab, and the floor eats their bottom padding.
 - **Don't stretch the grid to fill the height.** Putting a `min-height`
   on `.grid` does grow the rows, but `aspect-ratio` cells refuse to grow
   with them and you get ink-coloured bands behind them. Centring the
