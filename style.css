@@ -73,6 +73,10 @@ body{
      removing cells never punches a gap into the wall */
   grid-auto-flow:dense;
   gap:var(--line);
+  /* The same hairline around the outside. Without it only fully interior
+     cells get a rule on all four sides, and every cell on the perimeter
+     looks unbordered by comparison. */
+  padding:var(--line);
   background:var(--ink);
   width:100%;
   max-width:1360px;
