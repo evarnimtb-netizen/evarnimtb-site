@@ -304,14 +304,16 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 }
 
 /* ---------- quotes ---------- */
-/* margin-top:auto keeps a short list sitting on the bottom rule, the way
-   the single pull quote used to. With enough quotes to fill the cell it
-   stops doing anything and they simply stack. */
+/* Top aligned, like every other cell. It used to carry margin-top:auto,
+   left over from when this was a single pull quote sitting on the bottom
+   rule. With a list that reads as a dead gap above the first quote — and
+   the cell's height comes from its width via aspect-ratio, so the gap
+   grew as the window widened. Measured 106px against the 19px of padding
+   every other cell shows. */
 .quotes{
   display:flex;
   flex-direction:column;
   gap:1.1rem;
-  margin-top:auto;
 }
 .quotes li{display:flex;flex-direction:column;gap:.3rem}
 .quotes blockquote{
