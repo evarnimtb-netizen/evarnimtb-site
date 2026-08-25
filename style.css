@@ -1,0 +1,278 @@
+/* ============================================================
+   evarnimtb — skeleton stylesheet
+   no framework, no webfonts, no javascript.
+   ============================================================ */
+
+/* ---------- tokens ---------- */
+:root{
+  --ink:#111;
+  --paper:#fff;
+  --page:#e7e4dc;          /* behind the slab, so the shadow lands on something */
+  --dim:#777;
+
+  /* one line to repaint the whole site. some that work with this grid:
+     #ff3b00 blaze · #0026ff klein blue · #00c853 terminal green
+     #ff2e88 magenta · #ffd400 hazard yellow                        */
+  --accent:#ff3b00;
+
+  --line:1px;
+  --pad:1.5rem;
+  --cols:4;
+  --gutter:clamp(16px,3vw,40px);   /* breathing room around the slab */
+  --sh:14px;                       /* how far the far dither band reaches */
+
+  --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+
+  /* ---- dither ----
+     A conic gradient tiled at 4px = a 2px checkerboard, i.e. a 50% and a
+     25% ordered-dither screen. Costs zero bytes and zero requests: no
+     image, no SVG, no blur filter to repaint on scroll. */
+  --dither-50:repeating-conic-gradient(var(--ink) 0% 25%,#0000 0% 50%);
+  --dither-25:repeating-conic-gradient(var(--ink) 0% 25%,#0000 0% 100%);
+  --dither-size:4px 4px;
+}
+
+/* ---------- reset (only what's needed) ---------- */
+*,*::before,*::after{box-sizing:border-box}
+body,h1,h2,p,ul,figure,blockquote{margin:0}
+ul{padding:0;list-style:none}
+img{max-width:100%;height:auto;display:block}
+
+html{-webkit-text-size-adjust:100%}
+body{
+  background:var(--page);
+  color:var(--ink);
+  font:400 15px/1.55 var(--sans);
+  padding:var(--gutter);
+  padding-bottom:calc(var(--gutter) + var(--sh)); /* the shadow lives here */
+
+  /* Sit the slab in the middle of the screen, so the gap below it matches
+     the gap above. `safe` makes it fall back to top-aligned once the page
+     is taller than the viewport, instead of clipping the nameplate.
+     Stretching the grid itself was the other option, but aspect-ratio
+     cells refuse to grow with their rows and it leaves ink-coloured
+     bands behind them. */
+  min-height:100svh;
+  display:grid;
+  align-content:center;
+  align-content:safe center;
+}
+::selection{background:var(--accent);color:var(--paper)}
+
+/* ============================================================
+   THE GRID
+   Slab background is ink + 1px gaps + white cells = hairline rules
+   with no border-collapse headaches. The page behind it is --page,
+   which is what makes the dithered shadow visible.
+   ============================================================ */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(var(--cols),1fr);
+  /* dense backfills any hole a cell's size leaves behind, so adding or
+     removing cells never punches a gap into the wall */
+  grid-auto-flow:dense;
+  gap:var(--line);
+  background:var(--ink);
+  width:100%;
+  max-width:1360px;
+  /* NOT margin:0 auto — body is a grid now, and an auto margin overrides
+     stretch, which collapses the slab to fit-content. */
+  justify-self:center;
+  position:relative;
+}
+
+/* ---- dithered drop shadow, two densities for a stepped ramp ----
+   Absolutely positioned, so they're out of grid flow and never become
+   grid items. --sh-far paints first, --sh-near paints over it. */
+.grid::before,.grid::after{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  pointer-events:none;
+  background-size:var(--dither-size);
+}
+.grid::before{ /* far, sparse */
+  inset:var(--sh) calc(var(--sh)*-1) calc(var(--sh)*-1) var(--sh);
+  background-image:var(--dither-25);
+}
+.grid::after{ /* near, dense */
+  inset:6px -6px -6px 6px;
+  background-image:var(--dither-50);
+}
+
+/* ---------- cells ---------- */
+/* aspect-ratio makes 1x1 cells square. Because the columns are a
+   definite 1fr, the squares give the auto rows a definite height,
+   which is what keeps the row-spanning cells square too.
+   No overflow:hidden here on purpose — it would zero out the grid item's
+   automatic minimum size, and cells would clip instead of grow.
+   z-index:0 makes each cell a stacking context, so the little dithered
+   shadows inside it sit above the cell's own white background. */
+.cell{
+  background:var(--paper);
+  padding:var(--pad);
+  aspect-ratio:1/1;
+  display:flex;
+  flex-direction:column;
+  gap:.7rem;
+  min-width:0;
+  position:relative;
+  z-index:0;
+}
+
+.cell--w2{grid-column:span 2;aspect-ratio:2/1}
+.cell--w4{grid-column:span 4;aspect-ratio:auto}
+.cell--h2{grid-row:span 2;aspect-ratio:auto}
+.cell--w2.cell--h2{aspect-ratio:auto}
+.cell--flat{aspect-ratio:auto}
+
+/* ---------- type ---------- */
+h1{
+  font:700 clamp(1.8rem,5vw,3.1rem)/1 var(--sans);
+  letter-spacing:-.03em;
+  text-transform:uppercase;
+}
+h2{
+  display:flex;
+  align-items:center;
+  gap:.5rem;
+  font:700 .68rem/1 var(--mono);
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  padding-bottom:.6rem;
+  border-bottom:var(--line) solid var(--ink);
+}
+h2::before{content:"";width:.5rem;height:.5rem;background:var(--accent);flex:none}
+
+p{max-width:60ch}
+a{color:var(--ink);text-decoration:underline;text-underline-offset:3px}
+a:hover{background:var(--accent);color:var(--paper);text-decoration:none}
+a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.note,.stamp,.sub{font:400 .68rem/1.4 var(--mono);color:var(--dim)}
+.stamp{margin-top:auto}
+.sub{letter-spacing:.08em;text-transform:uppercase}
+
+/* ---------- nameplate + avatar ---------- */
+.nameplate{
+  flex-direction:row;
+  align-items:center;
+  gap:clamp(1rem,2.5vw,1.6rem);
+  padding-block:1.5rem;
+}
+.avatar{
+  flex:none;
+  width:clamp(62px,9vw,104px);
+  aspect-ratio:1/1;
+  border:var(--line) solid var(--ink);
+  background:var(--paper);
+  display:grid;
+  place-items:center;
+  font:400 .65rem var(--mono);
+  color:var(--dim);
+  position:relative;
+}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.nameplate h1{margin-bottom:.35rem}
+
+/* ---------- pieces ---------- */
+.facts,.stack,.links,.entries{display:flex;flex-direction:column;gap:.35rem}
+.facts li,.stack li{font:400 .76rem/1.5 var(--mono)}
+.facts span{display:inline-block;min-width:3.2rem;color:var(--dim)}
+.links li{font-size:.9rem}
+.entries li{font-size:.8rem;border-left:2px solid var(--accent);padding-left:.6rem}
+
+.tags{display:flex;flex-wrap:wrap;gap:.35rem}
+.tags li{
+  border:var(--line) solid var(--ink);
+  padding:.15rem .5rem;
+  font:400 .68rem/1.5 var(--mono);
+}
+.tags li:hover{background:var(--accent);color:var(--paper);border-color:var(--accent)}
+
+/* the politician wall: a grid inside a grid cell */
+.wall{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:.6rem;
+  min-height:0;
+}
+.slot{display:flex;flex-direction:column;gap:.5rem;min-width:0}
+.frame{
+  aspect-ratio:1/1;
+  border:var(--line) solid var(--ink);
+  background:var(--paper);
+  display:grid;
+  place-items:center;
+  font:400 .65rem var(--mono);
+  color:var(--dim);
+  position:relative;
+}
+.frame img{width:100%;height:100%;object-fit:cover}
+.slot figcaption{font:400 .62rem var(--mono);color:var(--dim)}
+
+/* small dithered shadow, same screen as the slab's. Keep the offset
+   smaller than .slot's gap or it prints over the caption underneath. */
+.avatar::after,.frame::after{
+  content:"";
+  position:absolute;
+  inset:4px -4px -4px 4px;
+  z-index:-1;
+  pointer-events:none;
+  background-image:var(--dither-50);
+  background-size:var(--dither-size);
+}
+
+.cell--big blockquote{
+  font:400 clamp(1rem,2vw,1.35rem)/1.25 var(--sans);
+  letter-spacing:-.01em;
+  margin-top:auto;
+}
+
+.foot{
+  flex-direction:row;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  font:400 .66rem var(--mono);
+  color:var(--dim);
+  padding-block:.9rem;
+}
+
+/* ============================================================
+   BREAKPOINTS
+   ============================================================ */
+@media (max-width:900px){
+  :root{--cols:2;--pad:1.2rem}
+  .cell--w4{grid-column:span 2}
+  /* two columns can't hold a 2-wide-2-tall cell without going enormous */
+  .cell--w2.cell--h2{grid-row:span 1;aspect-ratio:2/1}
+  .cell--h2{grid-row:span 1;aspect-ratio:1/1}
+  /* At two columns the 1x1 cells have to come out even or the odd one
+     leaves a hole beside it. The quote cell widens to absorb it.
+     Same rule if you add cells: pair your 1x1s, or widen one. */
+  .cell--big{grid-column:span 2;aspect-ratio:2/1}
+}
+
+@media (max-width:560px){
+  :root{--cols:1}
+  .cell,.cell--w2,.cell--w4{grid-column:span 1}
+  /* every one of these needs naming explicitly: the 900px rules above are
+     more specific than a bare .cell and would keep their aspect ratios */
+  .cell,.cell--w2,.cell--w4,.cell--h2,.cell--w2.cell--h2,.cell--big{aspect-ratio:auto}
+  .cell--h2,.cell--w2.cell--h2{grid-row:span 1}
+  .cell{min-height:9rem}
+  .wall{grid-template-columns:repeat(2,1fr)}
+  .foot{flex-direction:column;gap:.25rem}
+  /* tighter shadow so it doesn't eat the narrow margins */
+  :root{--sh:8px}
+  .grid::after{inset:4px -4px -4px 4px}
+}
+
+/* ============================================================
+   The dither is a decorative screen, not information. If someone
+   has asked for less contrast noise, drop it.
+   ============================================================ */
+@media (prefers-contrast:less){
+  .grid::before,.grid::after,.avatar::after,.frame::after{display:none}
+}
