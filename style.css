@@ -8,7 +8,7 @@
   --ink:#111;
   --paper:#fff;
   --page:#e7e4dc;          /* behind the slab, so the shadow lands on something */
-  --dim:#777;
+  --dim:#6b6b6b;   /* 5.3:1 on paper. #777 measured 4.48:1, just under AA's 4.5 */
 
   /* one line to repaint the whole site. some that work with this grid:
      #ff3b00 blaze · #0026ff klein blue · #00c853 terminal green
@@ -58,7 +58,7 @@ body{
   align-content:center;
   align-content:safe center;
 }
-::selection{background:var(--accent);color:var(--paper)}
+::selection{background:var(--accent);color:var(--ink)}
 
 /* ============================================================
    THE GRID
@@ -123,8 +123,10 @@ body{
   min-width:0;
   position:relative;
   z-index:0;
-  /* No align-self:stretch here, and no min-height floor. Both were tried
-     and both broke worse things:
+  /* No align-self:stretch or min-height floor on .cell ITSELF. Single
+     column cells get both in the rule just below this block — read that
+     one too before changing either. Applied to every cell, they break
+     worse things:
 
      - stretch alone pins the height to the grid row, so a cell with more
        content than fits its square spills over its neighbour instead of
@@ -135,8 +137,8 @@ body{
        the text eats its own bottom padding — measured at -1px, i.e. text
        sitting past the cell edge.
 
-     Leaving alignment alone lets aspect-ratio act as a floor that content
-     can push past, which is the behaviour the whole layout assumes.
+     Leaving alignment alone on the wide cells lets aspect-ratio act as a
+     floor that content can push past, which is what the layout assumes.
 
      Known limitation: a cell that spans two rows and outgrows them makes
      those rows taller, and an aspect-ratio'd single-row neighbour will
@@ -158,7 +160,13 @@ body{
    enough that the min-content floor is safe. Applying it to the wide
    cells makes QUOTES and GUESTBOOK overflow the slab, and applying the
    floor to them eats their bottom padding — both measured, twice. */
-.cell:not(.cell--w2):not(.cell--w4){
+/* :where() keeps this at the specificity of a bare .cell, so the
+   min-height:9rem in the 560px block below still wins on mobile. Without
+   it this selector scores higher than .cell and silently overrode that
+   floor. [class*=cell--w] rather than naming w2/w4, so a future width
+   modifier is excluded automatically instead of falling in here and
+   overflowing the slab. */
+.cell:where(:not([class*="cell--w"])){
   align-self:stretch;
   min-height:min-content;
 }
@@ -189,7 +197,7 @@ h2::before{content:"";width:.5rem;height:.5rem;background:var(--accent);flex:non
 
 p{max-width:60ch}
 a{color:var(--ink);text-decoration:underline;text-underline-offset:3px}
-a:hover{background:var(--accent);color:var(--paper);text-decoration:none}
+a:hover{background:var(--accent);color:var(--ink);text-decoration:none}
 a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
 .note,.stamp,.sub{font:400 .68rem/1.4 var(--mono);color:var(--dim)}
@@ -222,7 +230,13 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .facts,.stack,.links,.entries{display:flex;flex-direction:column;gap:.35rem}
 .facts li,.stack li{font:400 .76rem/1.5 var(--mono)}
 .facts span{display:inline-block;min-width:3.2rem;color:var(--dim)}
+/* 24px minimum tap target. The bare anchors were 17px tall; padding on
+   an inline-block gets them over the line, and the list gap shrinks to
+   keep the visual rhythm. The guestbook link stays inline — a link
+   inside a sentence is exempt. */
+.links{gap:.1rem}
 .links li{font-size:.9rem}
+.links a{display:inline-block;padding-block:.3rem}
 .entries li{font-size:.8rem;border-left:2px solid var(--accent);padding-left:.6rem}
 /* the sign-up blurb sits last in the cell; give it a little more room off
    the bottom rule than the cell padding alone provides */
@@ -234,7 +248,7 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   padding:.15rem .5rem;
   font:400 .68rem/1.5 var(--mono);
 }
-.tags li:hover{background:var(--accent);color:var(--paper);border-color:var(--accent)}
+.tags li:hover{background:var(--accent);color:var(--ink);border-color:var(--accent)}
 
 /* the politician wall: a grid inside a grid cell */
 .wall{
@@ -272,7 +286,7 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   flex:1;                 /* absorb the stretch when a neighbour is taller */
   min-height:1.8rem;
   padding:.35rem .45rem;
-  font:400 .62rem/1.3 var(--mono);
+  font:400 .68rem/1.3 var(--mono);
   color:var(--dim);
   overflow-wrap:anywhere;
 }
@@ -312,12 +326,12 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   padding-left:1.1em;
   text-indent:-1.1em;
 }
-.quotes cite{
+.quotes .cite{
   font:400 .68rem/1.3 var(--mono);
   font-style:normal;
   color:var(--dim);
 }
-.quotes cite::before{content:"— "}
+.quotes .cite::before{content:"— "}
 
 .foot{
   flex-direction:row;
