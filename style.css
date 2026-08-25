@@ -284,9 +284,16 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 }
 .quotes li{display:flex;flex-direction:column;gap:.3rem}
 .quotes blockquote{
-  font:400 clamp(.95rem,1.5vw,1.2rem)/1.3 var(--sans);
+  font:400 clamp(.95rem,1.5vw,1.2rem)/1.35 var(--sans);
   letter-spacing:-.01em;
-  text-wrap:pretty;
+}
+/* One line of verse. Hanging indent so that a line too long for the cell
+   wraps visibly as a continuation, rather than reading as another line
+   of the poem. */
+.quotes .l{
+  display:block;
+  padding-left:1.1em;
+  text-indent:-1.1em;
 }
 .quotes cite{
   font:400 .68rem/1.3 var(--mono);
