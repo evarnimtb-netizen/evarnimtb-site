@@ -119,6 +119,12 @@ body{
   min-width:0;
   position:relative;
   z-index:0;
+  /* align-self:normal behaves as `start` for a box with an aspect-ratio,
+     so a cell sitting next to a taller row-spanning neighbour would keep
+     its square and leave an ink-coloured band in the rest of its row.
+     Explicit stretch makes it fill the row it was dealt; when the row is
+     exactly square this is a no-op. */
+  align-self:stretch;
 }
 
 .cell--w2{grid-column:span 2;aspect-ratio:2/1}
@@ -198,10 +204,21 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   gap:.6rem;
   min-height:0;
 }
-.slot{display:flex;flex-direction:column;gap:.5rem;min-width:0}
+/* Each slot is one bordered card: picture on top, a caption strip along
+   the bottom, one hairline between them. The strip is a flex child, so
+   when the grid row stretches a card to match a taller neighbour the
+   extra height lands in the caption and the pictures stay aligned. */
+.slot{
+  display:flex;
+  flex-direction:column;
+  min-width:0;
+  border:var(--line) solid var(--ink);
+  background:var(--paper);
+  position:relative;
+}
 .frame{
   aspect-ratio:1/1;
-  border:var(--line) solid var(--ink);
+  border-bottom:var(--line) solid var(--ink);
   background:var(--paper);
   display:grid;
   place-items:center;
@@ -210,11 +227,20 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   position:relative;
 }
 .frame img{width:100%;height:100%;object-fit:cover}
-.slot figcaption{font:400 .62rem var(--mono);color:var(--dim)}
+.slot figcaption{
+  display:flex;
+  align-items:center;
+  flex:1;                 /* absorb the stretch when a neighbour is taller */
+  min-height:1.8rem;
+  padding:.35rem .45rem;
+  font:400 .62rem/1.3 var(--mono);
+  color:var(--dim);
+  overflow-wrap:anywhere;
+}
 
 /* small dithered shadow, same screen as the slab's. Keep the offset
-   smaller than .slot's gap or it prints over the caption underneath. */
-.avatar::after,.frame::after{
+   smaller than .wall's gap or it prints onto the next card along. */
+.avatar::after,.slot::after{
   content:"";
   position:absolute;
   inset:4px -4px -4px 4px;
@@ -274,5 +300,5 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
    has asked for less contrast noise, drop it.
    ============================================================ */
 @media (prefers-contrast:less){
-  .grid::before,.grid::after,.avatar::after,.frame::after{display:none}
+  .grid::before,.grid::after,.avatar::after,.slot::after{display:none}
 }
