@@ -123,19 +123,27 @@ body{
   min-width:0;
   position:relative;
   z-index:0;
-  /* Two rules that have to be read together.
+  /* No align-self:stretch here, and no min-height floor. Both were tried
+     and both broke worse things:
 
-     align-self:normal behaves as `start` for a box with an aspect-ratio,
-     so a cell next to a taller row-spanning neighbour would keep its
-     square and leave an ink-coloured band in the rest of its row.
-     Explicit stretch makes it fill the row it was dealt.
+     - stretch alone pins the height to the grid row, so a cell with more
+       content than fits its square spills over its neighbour instead of
+       growing.
+     - stretch + an intrinsic min-height floor (min-content, fit-content
+       or max-content, all identical here) under-counts padding under
+       box-sizing:border-box. The cell ends up exactly content-height and
+       the text eats its own bottom padding — measured at -1px, i.e. text
+       sitting past the cell edge.
 
-     But stretch alone pins the height to the row and stops the cell
-     growing for its own content, so a cell with more text than fits its
-     square spilled over its neighbour instead. min-content restores the
-     floor: never shorter than the content needs. */
-  align-self:stretch;
-  min-height:min-content;
+     Leaving alignment alone lets aspect-ratio act as a floor that content
+     can push past, which is the behaviour the whole layout assumes.
+
+     Known limitation: a cell that spans two rows and outgrows them makes
+     those rows taller, and an aspect-ratio'd single-row neighbour will
+     not follow, leaving an ink-coloured band beside it. It needs a cell
+     to outgrow its square to trigger, which no current content does. If
+     it shows up, shorten that cell's content rather than reaching for
+     align-self. */
 }
 
 .cell--w2{grid-column:span 2;aspect-ratio:2/1}
@@ -199,6 +207,9 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .facts span{display:inline-block;min-width:3.2rem;color:var(--dim)}
 .links li{font-size:.9rem}
 .entries li{font-size:.8rem;border-left:2px solid var(--accent);padding-left:.6rem}
+/* the sign-up blurb sits last in the cell; give it a little more room off
+   the bottom rule than the cell padding alone provides */
+.entries ~ .note{margin-bottom:.4rem}
 
 .tags{display:flex;flex-wrap:wrap;gap:.35rem}
 .tags li{
