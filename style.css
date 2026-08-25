@@ -123,12 +123,19 @@ body{
   min-width:0;
   position:relative;
   z-index:0;
-  /* align-self:normal behaves as `start` for a box with an aspect-ratio,
-     so a cell sitting next to a taller row-spanning neighbour would keep
-     its square and leave an ink-coloured band in the rest of its row.
-     Explicit stretch makes it fill the row it was dealt; when the row is
-     exactly square this is a no-op. */
+  /* Two rules that have to be read together.
+
+     align-self:normal behaves as `start` for a box with an aspect-ratio,
+     so a cell next to a taller row-spanning neighbour would keep its
+     square and leave an ink-coloured band in the rest of its row.
+     Explicit stretch makes it fill the row it was dealt.
+
+     But stretch alone pins the height to the row and stops the cell
+     growing for its own content, so a cell with more text than fits its
+     square spilled over its neighbour instead. min-content restores the
+     floor: never shorter than the content needs. */
   align-self:stretch;
+  min-height:min-content;
 }
 
 .cell--w2{grid-column:span 2;aspect-ratio:2/1}
