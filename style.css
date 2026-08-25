@@ -172,6 +172,13 @@ body{
 }
 
 .cell--w2{grid-column:span 2;aspect-ratio:2/1}
+/* The quote cell hugs its quotes instead of holding a 2:1 box. Its 2:1
+   height is well past what the list needs at some widths — 360px of cell
+   for 278px of content at two columns — and the surplus can only pile up
+   at one end or the other. Without the ratio the cell is exactly as tall
+   as its content, and having no aspect-ratio also means align-self falls
+   back to stretch, so it still fills a row a neighbour makes taller. */
+.cell--w2.cell--big{aspect-ratio:auto}
 .cell--w4{grid-column:span 4;aspect-ratio:auto}
 .cell--h2{grid-row:span 2;aspect-ratio:auto}
 .cell--w2.cell--h2{aspect-ratio:auto}
