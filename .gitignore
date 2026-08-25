@@ -1,1 +1,5 @@
 .DS_Store
+
+# local image scratch — source files stay off the public repo.
+# optimized copies that the site actually uses live at the root.
+Images/
